@@ -131,7 +131,7 @@ if __name__ == '__main__':
     print('Data loaded')
 
     trained_model_path = 'Trained_Models/model_Vgg16_CNN.pth'
-    
+
     if os.path.exists(trained_model_path):
         model = ConvNet()
         model.load_state_dict(torch.load(trained_model_path))
@@ -140,12 +140,16 @@ if __name__ == '__main__':
         model = ConvNet()
 
         model = model.to(device)
-    
-    optimizer = optim.SGD(model.parameters(), lr=0.001)
+
+    best_accuracy = 0.0
+
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
 
     for epoch in range(1, 10):
         train_loss = train(model, device, train_loader, optimizer, epoch)
         test_loss, accuracy = test(model, device, test_loader)
-
-    torch.save(model.state_dict(), 'Trained_Models/model_Vgg16_CNN.pth')
-    print('Model saved')
+    
+    if accuracy > best_accuracy:
+        best_accuracy = accuracy
+        torch.save(model.state_dict(), 'Trained_Models/model_Vgg16_CNN.pth')
+        print('Model saved')
