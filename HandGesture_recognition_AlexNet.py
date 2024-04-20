@@ -14,9 +14,9 @@ from ultralytics import YOLO
 batch_size = 128
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-class MY_CNN(nn.Module):
+class AlexNet(nn.Module):
     def __init__(self):
-        super(MY_CNN, self).__init__()
+        super(AlexNet, self).__init__()
 
         self.model = nn.Sequential( #3 32 32
             nn.Conv2d(in_channels=3, out_channels=6, kernel_size=5, stride=1, padding=2),# 6 32 32
@@ -148,10 +148,16 @@ if __name__ == '__main__':
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
 
-    model = MY_CNN()
-    model.load_state_dict(torch.load('Trained_Models/model_Vgg16_1.pth'))
-    model = model.to(device)
-    
+    trained_model_path = 'Trained_Models/model_Vgg16_AlexNet.pth'
+
+    if os.path.exists(trained_model_path):
+        model = AlexNet()
+        model.load_state_dict(torch.load(trained_model_path))
+        model = model.to(device)
+    else:
+        model = AlexNet()
+        model = model.to(device)
+
     optimizer = optim.Adam(model.parameters(), lr=0.001)
 
     for epoch in range(1, 11):
