@@ -147,6 +147,7 @@ if __name__ == '__main__':
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+<<<<<<< HEAD
 
     trained_model_path = 'Trained_Models/model_Vgg16_AlexNet.pth'
 
@@ -158,6 +159,13 @@ if __name__ == '__main__':
         model = AlexNet()
         model = model.to(device)
 
+=======
+    
+    model = MY_CNN()
+    model.load_state_dict(torch.load('Trained_Models/model_Vgg16_1.pth'))
+    model = model.to(device)
+    
+>>>>>>> none
     optimizer = optim.Adam(model.parameters(), lr=0.001)
 
     for epoch in range(1, 11):
