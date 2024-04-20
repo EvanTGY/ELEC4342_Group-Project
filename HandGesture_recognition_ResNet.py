@@ -9,7 +9,7 @@ from torch.utils.data.dataset import Dataset
 from torchvision.models import resnet50
 
 
-batch_size = 128
+batch_size = 64
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
@@ -80,6 +80,9 @@ def train(model, device, train_loader, optimizer,epoch):
         loss.backward()
         optimizer.step()
         train_loss += loss.item()
+        
+        torch.cuda.empty_cache()
+
     train_loss /= len(train_loader.dataset)
     print ('Epoch: {}'.format(epoch))
     print('Average train Loss: {:.6f}'.format(train_loss))
