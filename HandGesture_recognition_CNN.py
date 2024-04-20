@@ -1,67 +1,46 @@
-import os
 import torch
+import os
 import torchvision
 import torch.nn as nn
 import torch.optim as optim
 from PIL import Image
 from torchvision import datasets, transforms
-import cv2
+from torch.utils.data.sampler import SubsetRandomSampler
 from torch.utils.data.dataset import Dataset
-from torchvision import models
-from ultralytics import YOLO
 
 
-batch_size = 128
+
+batch_size = 64
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-class MY_CNN(nn.Module):
+
+class ConvNet(nn.Module):
     def __init__(self):
-        super(MY_CNN, self).__init__()
+        super(ConvNet, self).__init__()
+        self.conv1 = nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(16, 32, kernel_size=3, stride=1, padding=1)
+        self.conv3 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
+        self.conv4 = nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1)
+        self.conv5 = nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1)
+        self.relu = nn.ReLU()
+        self.maxpool = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.fc = nn.Linear(56320, 4)
 
-        self.model = nn.Sequential( #3 32 32
-            nn.Conv2d(in_channels=3, out_channels=6, kernel_size=5, stride=1, padding=2),# 6 32 32
-            nn.MaxPool2d(kernel_size=2, stride=2, padding =0),#6 16 16
-            nn.BatchNorm2d(num_features=6),
-            nn.CELU(inplace=True),
-            
-            nn.Conv2d(in_channels=6, out_channels=12, kernel_size=5, stride=1, padding=2),# 12 16 16
-            nn.MaxPool2d(kernel_size=2, stride=2, padding =0), #12 8 8
-            nn.BatchNorm2d(num_features=12),
-            nn.CELU(inplace=True),
-            
-            nn.Conv2d(in_channels=12, out_channels=8, kernel_size=3, stride=1, padding=1),# 8 8 8
-            nn.BatchNorm2d(num_features=8),
-            nn.CELU(inplace=True),
+    def forward(self, x):
+        x = self.relu(self.conv1(x))
+        x = self.maxpool(x)
+        x = self.relu(self.conv2(x))
+        x = self.maxpool(x)
+        x = self.relu(self.conv3(x))
+        x = self.maxpool(x)
+        x = self.relu(self.conv4(x))
+        x = self.maxpool(x)
+        x = self.relu(self.conv5(x))
+        x = self.maxpool(x)
+        x = x.view(x.size(0), -1)
+        x = self.fc(x)
+        return x
 
-            nn.Conv2d(in_channels=8, out_channels=6, kernel_size=3, stride=1, padding=1),# 6 8 8
-            nn.BatchNorm2d(num_features=6),
-            nn.CELU(inplace=True),
-
-            nn.Conv2d(in_channels=6, out_channels=4, kernel_size=3, stride=1, padding=1),# 4 8 8
-            nn.MaxPool2d(kernel_size=2, stride=2, padding =0), # 4 4 4
-            nn.BatchNorm2d(num_features=4),
-            nn.CELU(inplace=True),
-            )
-
-        self.liner = nn.Sequential(
-
-            nn.Linear(3136,4*4*4),
-            nn.CELU(inplace=True),
-
-            nn.Linear(4*4*4,16),
-            nn.Tanh(),
-
-            nn.Linear(16,4)
-        )
-        
-    def forward(self, img):
-        
-        x = self.model(img)
-
-        z = self.liner(x.view(x.shape[0], -1))
-
-        return z
-    
 class Dataset(Dataset):
     def __init__(self, root="./data", train=True, transforms=None):
         self.root = root
@@ -108,6 +87,9 @@ def train(model, device, train_loader, optimizer,epoch):
         loss.backward()
         optimizer.step()
         train_loss += loss.item()
+        
+        torch.cuda.empty_cache()
+
     train_loss /= len(train_loader.dataset)
     print ('Epoch: {}'.format(epoch))
     print('Average train Loss: {:.6f}'.format(train_loss))
@@ -136,7 +118,6 @@ def test(model, device, test_loader):
 if __name__ == '__main__':
     
     transformations= transforms.Compose([
-                    transforms.Resize((227,227)),
                     transforms.RandomRotation(180),
                     transforms.ToTensor(), 
                     transforms.Normalize((0.1307,), (0.3081,))
@@ -147,16 +128,24 @@ if __name__ == '__main__':
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+    print('Data loaded')
 
-    model = MY_CNN()
-    model.load_state_dict(torch.load('Trained_Models/model_Vgg16_1.pth'))
-    model = model.to(device)
+    trained_model_path = 'Trained_Models/model_Vgg16_CNN.pth'
     
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    if os.path.exists(trained_model_path):
+        model = ConvNet()
+        model.load_state_dict(torch.load(trained_model_path))
+        model = model.to(device)
+    else:
+        model = ConvNet()
 
-    for epoch in range(1, 11):
+        model = model.to(device)
+    
+    optimizer = optim.SGD(model.parameters(), lr=0.001)
+
+    for epoch in range(1, 10):
         train_loss = train(model, device, train_loader, optimizer, epoch)
         test_loss, accuracy = test(model, device, test_loader)
 
-    torch.save(model.state_dict(), 'Trained_Models/model_Vgg16_AlexNet.pth')
+    torch.save(model.state_dict(), 'Trained_Models/model_Vgg16_CNN.pth')
     print('Model saved')
