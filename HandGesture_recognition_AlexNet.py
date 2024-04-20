@@ -4,15 +4,62 @@ import torch.nn as nn
 import torch.optim as optim
 from PIL import Image
 from torchvision import datasets, transforms
-from torch.utils.data.sampler import SubsetRandomSampler
+import cv2
 from torch.utils.data.dataset import Dataset
-from torchvision.models import resnet50
+from torchvision import models
+from ultralytics import YOLO
 
 
-batch_size = 64
+batch_size = 128
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+class MY_CNN(nn.Module):
+    def __init__(self):
+        super(MY_CNN, self).__init__()
 
+        self.model = nn.Sequential( #3 32 32
+            nn.Conv2d(in_channels=3, out_channels=6, kernel_size=5, stride=1, padding=2),# 6 32 32
+            nn.MaxPool2d(kernel_size=2, stride=2, padding =0),#6 16 16
+            nn.BatchNorm2d(num_features=6),
+            nn.CELU(inplace=True),
+            
+            nn.Conv2d(in_channels=6, out_channels=12, kernel_size=5, stride=1, padding=2),# 12 16 16
+            nn.MaxPool2d(kernel_size=2, stride=2, padding =0), #12 8 8
+            nn.BatchNorm2d(num_features=12),
+            nn.CELU(inplace=True),
+            
+            nn.Conv2d(in_channels=12, out_channels=8, kernel_size=3, stride=1, padding=1),# 8 8 8
+            nn.BatchNorm2d(num_features=8),
+            nn.CELU(inplace=True),
+
+            nn.Conv2d(in_channels=8, out_channels=6, kernel_size=3, stride=1, padding=1),# 6 8 8
+            nn.BatchNorm2d(num_features=6),
+            nn.CELU(inplace=True),
+
+            nn.Conv2d(in_channels=6, out_channels=4, kernel_size=3, stride=1, padding=1),# 4 8 8
+            nn.MaxPool2d(kernel_size=2, stride=2, padding =0), # 4 4 4
+            nn.BatchNorm2d(num_features=4),
+            nn.CELU(inplace=True),
+            )
+
+        self.liner = nn.Sequential(
+
+            nn.Linear(3136,4*4*4),
+            nn.CELU(inplace=True),
+
+            nn.Linear(4*4*4,16),
+            nn.Tanh(),
+
+            nn.Linear(16,4)
+        )
+        
+    def forward(self, img):
+        
+        x = self.model(img)
+
+        z = self.liner(x.view(x.shape[0], -1))
+
+        return z
 
 class Dataset(Dataset):
     def __init__(self, root="./data", train=True, transforms=None):
@@ -60,9 +107,6 @@ def train(model, device, train_loader, optimizer,epoch):
         loss.backward()
         optimizer.step()
         train_loss += loss.item()
-        
-        torch.cuda.empty_cache()
-
     train_loss /= len(train_loader.dataset)
     print ('Epoch: {}'.format(epoch))
     print('Average train Loss: {:.6f}'.format(train_loss))
@@ -90,23 +134,27 @@ def test(model, device, test_loader):
 
 if __name__ == '__main__':
     
-    transformations= transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
+    transformations= transforms.Compose([
+                    transforms.Resize((227,227)),
+                    transforms.RandomRotation(180),
+                    transforms.ToTensor(), 
+                    transforms.Normalize((0.1307,), (0.3081,))
+                    ])
 
     train_dataset = Dataset(root="./data", train=True, transforms=transformations)
     test_dataset = Dataset(root="./data", train=False, transforms=transformations)
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+
     print('Data loaded')
 
 
-    model = resnet50(pretrained=True)
-    num_ftrs = model.fc.in_features
-    model.fc = nn.Linear(num_ftrs, 3)
+    model = MY_CNN()
 
     model = model.to(device)
     
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    optimizer = optim.SGD(model.parameters(), lr=0.001)
 
     for epoch in range(1, 10):
         train_loss = train(model, device, train_loader, optimizer, epoch)
