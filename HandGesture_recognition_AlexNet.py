@@ -154,11 +154,11 @@ if __name__ == '__main__':
 
     model = model.to(device)
     
-    optimizer = optim.SGD(model.parameters(), lr=0.001)
+    optimizer = optim.SGD(model.parameters(), lr=0.01)
 
     for epoch in range(1, 10):
         train_loss = train(model, device, train_loader, optimizer, epoch)
         test_loss, accuracy = test(model, device, test_loader)
 
-    torch.save(model.state_dict(), 'Trained_Models/model_Vgg16.pth')
+    torch.save(model.state_dict(), 'Trained_Models/model_Vgg16_1.pth')
     print('Model saved')
