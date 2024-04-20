@@ -1,3 +1,4 @@
+import os
 import torch
 import torchvision
 import torch.nn as nn
@@ -60,7 +61,7 @@ class MY_CNN(nn.Module):
         z = self.liner(x.view(x.shape[0], -1))
 
         return z
-
+    
 class Dataset(Dataset):
     def __init__(self, root="./data", train=True, transforms=None):
         self.root = root
@@ -147,16 +148,13 @@ if __name__ == '__main__':
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
 
-    print('Data loaded')
-
-
     model = MY_CNN()
-
+    model.load_state_dict(torch.load('Trained_Models/model_Vgg16_1.pth'))
     model = model.to(device)
     
-    optimizer = optim.SGD(model.parameters(), lr=0.01)
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-    for epoch in range(1, 10):
+    for epoch in range(1, 11):
         train_loss = train(model, device, train_loader, optimizer, epoch)
         test_loss, accuracy = test(model, device, test_loader)
 
