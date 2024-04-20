@@ -5,10 +5,8 @@ import torch.nn as nn
 import torch.optim as optim
 from PIL import Image
 from torchvision import datasets, transforms
-import cv2
 from torch.utils.data.dataset import Dataset
 from torchvision import models
-from ultralytics import YOLO
 
 
 batch_size = 128
@@ -166,6 +164,6 @@ if __name__ == '__main__':
     for epoch in range(1, 11):
         train_loss = train(model, device, train_loader, optimizer, epoch)
         test_loss, accuracy = test(model, device, test_loader)
-    
+
     torch.save(model.state_dict(), 'Trained_Models/model_AlexNet.pth')
     print('Model saved')

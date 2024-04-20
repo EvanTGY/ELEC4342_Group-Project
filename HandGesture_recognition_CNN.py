@@ -149,7 +149,7 @@ if __name__ == '__main__':
         train_loss = train(model, device, train_loader, optimizer, epoch)
         test_loss, accuracy = test(model, device, test_loader)
     
-    if accuracy > best_accuracy:
-        best_accuracy = accuracy
-        torch.save(model.state_dict(), 'Trained_Models/model_Vgg16_CNN.pth')
-        print('Model saved')
+        if accuracy > best_accuracy:
+            best_accuracy = accuracy
+            torch.save(model.state_dict(), 'Trained_Models/model_Vgg16_CNN.pth')
+            print('Model saved')
