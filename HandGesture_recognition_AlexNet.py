@@ -7,7 +7,7 @@ from PIL import Image
 from torchvision import datasets, transforms
 from torch.utils.data.dataset import Dataset
 from torchvision import models
-
+import pandas as pd
 
 batch_size = 128
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -59,9 +59,9 @@ class AlexNet(nn.Module):
         z = self.liner(x.view(x.shape[0], -1))
 
         return z
-    
-class Dataset(Dataset):
-    def __init__(self, root="./data", train=True, transforms=None):
+
+class SaveImagesToCSV:
+    def __init__(self,root="./data", train = True, transforms=None):
         self.root = root
         self.pre = "/train_set/" if train else "/test_set/"
         self.count = 0
@@ -73,24 +73,36 @@ class Dataset(Dataset):
         for i in range(3):
             name = self.names[i]
             for j in range(self.nums[i]):
-                self.data.append(self.read_image(self.root+self.pre+name+str(j)+".jpg"))
+                self.data.append(self.root+self.pre+name+str(j)+".jpg")
                 self.labels.append(i)
                 self.count += 1
-
-    def read_image(self, file_name):
-        with Image.open(file_name) as image:
-        # image = torchvision.transforms.functional.pil_to_tensor(image)
-            return image.copy()
-
-    def __getitem__(self, index):
-        image = self.data[index]
-        if self.transforms is not None:
-            image = self.transforms(image)
-        label = self.labels[index]
-        return (image, label)
+        
+        df = pd.DataFrame({'image_path': self.data, 'label': self.labels})
+        if train:
+            df.to_csv('./data/train_set/train_images.csv', index=False)
+        else:
+            df.to_csv('./data/test_set/test_images.csv', index=False)
+    
+class Dataset(Dataset):
+    def __init__(self, csv_file, transforms = None):
+        if not os.path.exists(csv_file):
+            print('CSV file not found')
+            return
+        self.dataframe = pd.read_csv(csv_file)
+        self.transform = transforms
 
     def __len__(self):
-        return self.count
+        return len(self.dataframe)
+    
+    def __getitem__(self, idx):
+        image_path = self.dataframe.iloc[idx, 0]
+        image = Image.open(image_path)
+        if self.transform:
+            image = self.transform(image)
+        label = self.dataframe.iloc[idx, 1]
+        return image, label
+
+    
 
 criterion = nn.CrossEntropyLoss()
 
@@ -139,9 +151,11 @@ if __name__ == '__main__':
                     transforms.ToTensor(), 
                     transforms.Normalize((0.1307,), (0.3081,))
                     ])
+    save_train_images = SaveImagesToCSV(root="./data", train=True)
+    save_test_images = SaveImagesToCSV(root="./data", train=False)
 
-    train_dataset = Dataset(root="./data", train=True, transforms=transformations)
-    test_dataset = Dataset(root="./data", train=False, transforms=transformations)
+    train_dataset = Dataset(csv_file='./data/train_set/train_images.csv', transforms=transformations)
+    test_dataset = Dataset(csv_file="./data/test_set/test_images.csv", transforms=transformations)
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
@@ -150,16 +164,19 @@ if __name__ == '__main__':
     trained_model_path = 'Trained_Models/model_AlexNet.pth'
 
     if os.path.exists(trained_model_path):
+        print ('Loading model from {}'.format(trained_model_path))
         model = AlexNet()
         model.load_state_dict(torch.load(trained_model_path))
+        print ('Model loaded')
         model = model.to(device)
     else:
+        print ('Training model')
         model = AlexNet()
         model = model.to(device)
 
     best_accuracy = 0.0
 
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    optimizer = optim.SGD(model.parameters(), lr=0.001)
 
     for epoch in range(1, 11):
         train_loss = train(model, device, train_loader, optimizer, epoch)
