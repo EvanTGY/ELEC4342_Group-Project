@@ -1,6 +1,5 @@
 from matplotlib import transforms
 import torch
-import torchvision
 from PIL import Image
 from torch.utils.data.dataset import Dataset
 import torch.optim as optim
@@ -14,13 +13,7 @@ import os
 import glob
 import random
 import csv
-import time
 
-batch_size = 128
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-
-data_assume = torch.ones(size=(20, 3, 227, 227))
 
 class AlexNet(nn.Module):
     def __init__(self):
@@ -68,17 +61,13 @@ class dataset(Dataset):
             self.nametolabel[name] = len(self.nametolabel.keys())
         print(self.nametolabel)
         self.images, self.labels = self.load_csv('images.csv')
-        # cut the training, validating, testing set
-        if mode=='train': #60%
-            self.images = self.images[:int(0.6*len(self.images))]
-            self.labels = self.labels[:int(0.6*len(self.labels))]
-        elif mode=='val': #20% = 60%->80%
-            self.images = self.images[int(0.6*len(self.images)):int(0.8*len(self.images))]
-            self.labels = self.labels[int(0.6*len(self.labels)):int(0.8*len(self.labels))]
+        # cut the training, testing set
+        if mode=='train': #80%
+            self.images = self.images[:int(0.8*len(self.images))]
+            self.labels = self.labels[:int(0.8*len(self.labels))]
         else: #20% = 80%->100%
             self.images = self.images[int(0.8*len(self.images)):]
             self.labels = self.labels[int(0.8*len(self.labels)):]
-
 
         # image, label
     def load_csv(self, filename):
@@ -94,7 +83,6 @@ class dataset(Dataset):
                     name = img.split(os.sep)[-2]
                     label = self.nametolabel[name]
                     writer.writerow([img, label])
-                print("csv file is written:", filename)
         # read from csv file
         images, labels = [], []
         with open(os.path.join(self.root, filename)) as f:
@@ -176,57 +164,38 @@ def test(model, test_loader, Device):
     total_accuracy = 100 * correct / total
     return test_loss, total_accuracy
 
+
 def run(epoch, model, Device):
     test_losses = []
     test_accuracies = []
+    best_accuracy = 0
     for i in range(epoch):
         train(model, train_loader, Device)
         avg_test_loss, test_accuracy = test(model, test_loader, Device)
+        # if test_accuracy > best_accuracy:
+        #     best_accuracy = test_accuracy
+        #     torch.save(model.state_dict(), 'best.pth')
         test_losses.append(avg_test_loss)
         test_accuracies.append(test_accuracy)
         print(f"Epoch {i+1}: Loss = {avg_test_loss:.4f}, Accuracy = {test_accuracy:.2f}%")
+    print("The best accuracy: ", best_accuracy)
+    torch.save(model.state_dict(), 'final.pth')
     return test_losses, test_accuracies
-
-# 在 Net 类中修改 get_flattened_features 方法
-
-def data_main():
-    tf = transforms.Compose([
-        transforms.Resize((227,227)),
-        transforms.ToTensor()
-    ])
-    db = torchvision.datasets.ImageFolder(root='dataset', transform=tf)
-    loader = DataLoader(db, batch_size=batch_size, shuffle=True)
-
-    # db = dataset(root='dataset', resize=227, mode='train')
-    # x, y = next(iter(db))
-    # print("sample", x.shape, y)
-    # loader = DataLoader(db, batch_size=batch_size, shuffle=True)
-    # for x, y in loader:
-
 
 
 if __name__ == '__main__':
-    #args
-    learning_rate = 0.02
+    # args
+    learning_rate = 0.015
     criterion = nn.CrossEntropyLoss()
-    epoch = 20
-    
-    #dataset
-    # transformations = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
-    # train_dataset = Dataset(root="./data", train=True, transforms=transformations)
-    # print(train_dataset[0][0].size())
-    # test_dataset = Dataset(root="./data", train=False, transforms=transformations)
-    # print(test_dataset[0][0].size())
-    # train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    # test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
-    # print("Data loaded successfully")
+    epoch = 25
+    batch_size = 128
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # dataset
     train_db = dataset('dataset', 227, mode='train')
-    val_db = dataset('dataset', 227, mode='val')
     test_db = dataset('dataset', 227, mode='test')
     train_loader = DataLoader(train_db, batch_size=batch_size, shuffle=True, num_workers=4)
-    val_loader = DataLoader(val_db, batch_size=batch_size, num_workers=2)
     test_loader = DataLoader(test_db, batch_size=batch_size, num_workers=2)
-
+    # model
     model = AlexNet()
     print("Learning rate: ", learning_rate)
     before_test_losses, before_test_accuracies = run(epoch, model, device)
