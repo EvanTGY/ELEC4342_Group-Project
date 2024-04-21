@@ -8,7 +8,6 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.transforms.functional import to_pil_image, to_tensor
 import torch.nn.functional as F
-from torchinfo import summary
 import os
 import glob
 import random
