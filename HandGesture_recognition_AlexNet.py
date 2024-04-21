@@ -1,3 +1,4 @@
+import pandas
 import os
 import torch
 import torchvision
@@ -7,7 +8,7 @@ from PIL import Image
 from torchvision import datasets, transforms
 from torch.utils.data.dataset import Dataset
 from torchvision import models
-import pandas as pd
+import torch.nn.functional as F
 
 batch_size = 128
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -17,7 +18,7 @@ class AlexNet(nn.Module):
         super(AlexNet, self).__init__()
 
         self.model = nn.Sequential( #3 32 32
-            nn.Conv2d(in_channels=3, out_channels=6, kernel_size=5, stride=1, padding=2),# 6 32 32
+            nn.Conv2d(in_channels=3, out_channels=6, kernel_size=11, stride=4, padding=2),# 6 32 32
             nn.MaxPool2d(kernel_size=2, stride=2, padding =0),#6 16 16
             nn.BatchNorm2d(num_features=6),
             nn.CELU(inplace=True),
@@ -43,7 +44,7 @@ class AlexNet(nn.Module):
 
         self.liner = nn.Sequential(
 
-            nn.Linear(3136,4*4*4),
+            nn.Linear(64,4*4*4),
             nn.CELU(inplace=True),
 
             nn.Linear(4*4*4,16),
@@ -77,7 +78,7 @@ class SaveImagesToCSV:
                 self.labels.append(i)
                 self.count += 1
         
-        df = pd.DataFrame({'image_path': self.data, 'label': self.labels})
+        df = pandas.DataFrame({'image_path': self.data, 'label': self.labels})
         if train:
             df.to_csv('./data/train_set/train_images.csv', index=False)
         else:
@@ -88,7 +89,7 @@ class Dataset(Dataset):
         if not os.path.exists(csv_file):
             print('CSV file not found')
             return
-        self.dataframe = pd.read_csv(csv_file)
+        self.dataframe = pandas.read_csv(csv_file)
         self.transform = transforms
 
     def __len__(self):
@@ -176,11 +177,15 @@ if __name__ == '__main__':
 
     best_accuracy = 0.0
 
-    optimizer = optim.SGD(model.parameters(), lr=0.001)
+    optimizer = optim.SGD(model.parameters(), lr=0.01)
 
-    for epoch in range(1, 11):
+    schedular = optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
+
+    for epoch in range(1, 21):
         train_loss = train(model, device, train_loader, optimizer, epoch)
-        test_loss, accuracy = test(model, device, test_loader)
+        test_loss, accuracy = test(model, device, test_loader)  
+        schedular.step()
+        print ('learning rate: {}'.format(optimizer.param_groups[0]['lr']))
 
     torch.save(model.state_dict(), 'Trained_Models/model_AlexNet.pth')
     print('Model saved')
