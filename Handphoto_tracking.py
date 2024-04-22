@@ -2,11 +2,11 @@ import cv2
 import os
 import mediapipe as mp
 
-mp_hands = mp.solutions.hands.Hands(max_num_hands=1, min_detection_confidence=0.3, min_tracking_confidence=0.3)
+mp_hands = mp.solutions.hands.Hands(max_num_hands=1, min_detection_confidence=0.6, min_tracking_confidence=0.6)
 mp_draw = mp.solutions.drawing_utils
 
-input_folder_path = r"./data/train_set/O"
-output_folder_path = r"./data_marked/train_set/O"
+input_folder_path = r"./data/train_set/V"
+output_folder_path = r"./data_marked/train_set/V"
 
 os.makedirs(output_folder_path, exist_ok=True)
 
@@ -30,14 +30,14 @@ for filename in os.listdir(input_folder_path):
                                        mp_draw.DrawingSpec(color=(0, 255, 0), thickness=2, circle_radius=2),
                                        mp_draw.DrawingSpec(color=(0, 0, 255), thickness=3, circle_radius=2))
 
-        # save image
-        output_filename = f'{image_count}.jpg'
-        output_img_path = os.path.join(output_folder_path, output_filename)
-        cv2.imwrite(output_img_path, img)
+            # save image
+            output_filename = f'{image_count}.jpg'
+            output_img_path = os.path.join(output_folder_path, output_filename)
+            cv2.imwrite(output_img_path, img)
 
-        print(f'Saved output image: {output_img_path}')
+            print(f'Saved output image: {output_img_path}')
 
-        image_count += 1
+            image_count += 1
 
-# 释放资源
+
 mp_hands.close()
