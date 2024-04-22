@@ -53,9 +53,16 @@ while True:
     ret, frame = cap.read()
     if not ret:
         break
+
+     # 获取矩形区域的图像
+    roi = frame[top_left[1]:bottom_right[1], top_left[0]:bottom_right[0]]
+
+    # 将图像转换为模型需要的格式
+    image = transform(roi).unsqueeze(0)
     
     # 将 BGR 图像转换为 RGB 图像
     rgb_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    
     # 执行手部关键点检测
     results = mp_hands.process(rgb_image)
     
@@ -65,11 +72,7 @@ while True:
     
     cv2.rectangle(frame, top_left, bottom_right, (0, 255, 0), 2)
 
-    # 获取矩形区域的图像
-    roi = frame[top_left[1]:bottom_right[1], top_left[0]:bottom_right[0]]
-
-    # 将图像转换为模型需要的格式
-    image = transform(roi).unsqueeze(0)
+   
     
     # 运行模型
     with torch.no_grad():
