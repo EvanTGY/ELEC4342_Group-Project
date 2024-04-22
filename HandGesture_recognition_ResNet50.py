@@ -114,8 +114,8 @@ if __name__ == '__main__':
     save_train_images = SaveImagesToCSV(root="./data_marked", train=True)
     save_test_images = SaveImagesToCSV(root="./data_marked", train=False)
 
-    train_dataset = Dataset(csv_file='./data_marked/train_set/train_images.csv', transforms=transformations)
-    test_dataset = Dataset(csv_file="./data_marked/test_set/test_images.csv", transforms=transformations)
+    train_dataset = Dataset(csv_file='./data_marked/train_set/train_images_marked.csv', transforms=transformations)
+    test_dataset = Dataset(csv_file="./data_marked/test_set/test_images_marked.csv", transforms=transformations)
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
