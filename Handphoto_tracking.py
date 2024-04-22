@@ -5,8 +5,11 @@ import mediapipe as mp
 mp_hands = mp.solutions.hands.Hands(max_num_hands=1, min_detection_confidence=0.6, min_tracking_confidence=0.6)
 mp_draw = mp.solutions.drawing_utils
 
-input_folder_path = "./data/train_set/V"
-output_folder_path = "./data_marked/train_set/Scissor"
+# 改变工作目录到脚本所在的目录
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+input_folder_path = r"E:\OneDrive - The University of Hong Kong - Connect\2023-2024 HKU CE SOURCE(Yr2)\ELEC4342\ELEC4342_Group-Project\data_set\test_set\O"
+output_folder_path = r"E:\OneDrive - The University of Hong Kong - Connect\2023-2024 HKU CE SOURCE(Yr2)\ELEC4342\ELEC4342_Group-Project\data_marked\test_set\Rock"
 
 os.makedirs(output_folder_path, exist_ok=True)
 
