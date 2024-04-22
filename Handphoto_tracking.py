@@ -5,8 +5,8 @@ import mediapipe as mp
 mp_hands = mp.solutions.hands.Hands(max_num_hands=1, min_detection_confidence=0.6, min_tracking_confidence=0.6)
 mp_draw = mp.solutions.drawing_utils
 
-input_folder_path = r"./data/test_set/O"
-output_folder_path = r"./data_marked/test_set/Rock"
+input_folder_path = r"./data/test_set/V"
+output_folder_path = r"./data_marked/test_set/Scissor"
 
 os.makedirs(output_folder_path, exist_ok=True)
 
