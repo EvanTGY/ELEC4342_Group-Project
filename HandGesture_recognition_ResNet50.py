@@ -15,10 +15,6 @@ batch_size = 128
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
-# 改变工作目录到脚本所在的目录
-
-
-# 你的其他代码在这里
 class SaveImagesToCSV:
     def __init__(self,root="./data_marked", train = True, transforms=None):
         self.root = root
@@ -129,7 +125,7 @@ if __name__ == '__main__':
     model.fc = nn.Linear(num_ftrs, 3)
     # model = model.to(device)
 
-    trained_model_path = 'Trained_models_test/model_ResNet50_best.pth'
+    trained_model_path = 'Trained_Models_test/model_ResNet50_best.pth'
     if os.path.exists(trained_model_path):
         print('Loading model from {}'.format(trained_model_path))
         model.load_state_dict(torch.load(trained_model_path))
@@ -149,7 +145,7 @@ if __name__ == '__main__':
         test_loss, accuracy = test(model, device, test_loader)
         if test_loss < lowerst_test_loss:
             lowerst_test_loss = test_loss
-            torch.save(model.state_dict(), 'Trained_models_test/model_ResNet50_Marked.pth')
+            torch.save(model.state_dict(), 'Trained_Models_test/model_ResNet50_Marked.pth')
             print('Model saved')
             print('Model saved with test loss: {:.6f}'.format(test_loss))
             print('Model saved with accuracy: {:.2f}%'.format(accuracy))
