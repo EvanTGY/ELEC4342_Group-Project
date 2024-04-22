@@ -16,7 +16,6 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 
-# 你的其他代码在这里
 class SaveImagesToCSV:
     def __init__(self,root="./data_marked", train = True, transforms=None):
         self.root = root
