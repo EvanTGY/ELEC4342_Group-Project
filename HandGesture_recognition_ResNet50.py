@@ -9,9 +9,9 @@ from torchvision import datasets, transforms
 from torch.utils.data.sampler import SubsetRandomSampler
 from torch.utils.data.dataset import Dataset
 from torchvision.models import resnet50
-from torch.optim import lr_scheduler
 
-batch_size = 64
+
+batch_size = 128
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
@@ -103,7 +103,7 @@ if __name__ == '__main__':
     
     transformations= transforms.Compose([
                     transforms.Resize((224,224)),
-                    transforms.RandomRotation(30),
+                    transforms.RandomRotation(15),
                     transforms.ToTensor(), 
                     transforms.Normalize((0.1307,), (0.3081,))
                     ])
@@ -134,12 +134,11 @@ if __name__ == '__main__':
         model = model.to(device)
 
     
-    optimizer = optim.SGD(model.parameters(), lr=0.1)
-    scheduler = lr_scheduler.StepLR(optimizer, step_size=6, gamma=0.1)
+    optimizer = optim.SGD(model.parameters(), lr=0.0001)
 
     lowerst_test_loss = float('inf')
 
-    for epoch in range(1, 21):
+    for epoch in range(1, 11):
         train_loss = train(model, device, train_loader, optimizer, epoch)
         test_loss, accuracy = test(model, device, test_loader)
         if test_loss < lowerst_test_loss:
@@ -149,6 +148,3 @@ if __name__ == '__main__':
             print('Model saved with test loss: {:.6f}'.format(test_loss))
             print('Model saved with accuracy: {:.2f}%'.format(accuracy))
             print()
-            
-        # 更新学习率    
-        scheduler.step()
