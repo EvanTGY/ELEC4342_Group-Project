@@ -131,7 +131,7 @@ if __name__ == '__main__':
         test_loss, accuracy = test(model, device, test_loader)
         if test_loss < lowerst_test_loss:
             lowerst_test_loss = test_loss
-            torch.save(model.state_dict(), 'Trained_Models/model_ResNet_best.pth')
+            torch.save(model.state_dict(), 'Trained_Models_test/model_ResNet_best.pth')
             print('Model saved')
             print('Model saved with test loss: {:.6f}'.format(test_loss))
             print('Model saved with accuracy: {:.2f}%'.format(accuracy))
