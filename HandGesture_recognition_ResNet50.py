@@ -15,6 +15,10 @@ batch_size = 128
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
+# 改变工作目录到脚本所在的目录
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+# 你的其他代码在这里
 class SaveImagesToCSV:
     def __init__(self,root="./data_marked", train = True, transforms=None):
         self.root = root
@@ -34,9 +38,9 @@ class SaveImagesToCSV:
         
         df = pandas.DataFrame({'image_path': self.data, 'label': self.labels})
         if train:
-            df.to_csv('./data_marked/train_set/train_images.csv', index=False)
+            df.to_csv('./data_marked/train_set/train_images_marked.csv', index=False)
         else:
-            df.to_csv('./data_marked/test_set/test_images.csv', index=False)
+            df.to_csv('./data_marked/test_set/test_images_marked.csv', index=False)
     
 class Dataset(Dataset):
     def __init__(self, csv_file, transforms = None):
@@ -107,8 +111,8 @@ if __name__ == '__main__':
                     transforms.ToTensor(), 
                     transforms.Normalize((0.1307,), (0.3081,))
                     ])
-    save_train_images = SaveImagesToCSV(root="./data", train=True)
-    save_test_images = SaveImagesToCSV(root="./data", train=False)
+    save_train_images = SaveImagesToCSV(root="./data_marked", train=True)
+    save_test_images = SaveImagesToCSV(root="./data_marked", train=False)
 
     train_dataset = Dataset(csv_file='./data_marked/train_set/train_images.csv', transforms=transformations)
     test_dataset = Dataset(csv_file="./data_marked/test_set/test_images.csv", transforms=transformations)
