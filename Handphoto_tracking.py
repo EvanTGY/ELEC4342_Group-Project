@@ -8,8 +8,8 @@ mp_draw = mp.solutions.drawing_utils
 # 改变工作目录到脚本所在的目录
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-input_folder_path = "./data_set/train_set/V"
-output_folder_path = "./data_marked/train_set/Scissor"
+input_folder_path = "./data/train_set/W"
+output_folder_path = "./data_marked/train_set/Paper"
 
 os.makedirs(output_folder_path, exist_ok=True)
 
