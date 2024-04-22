@@ -140,7 +140,7 @@ if __name__ == '__main__':
         model = model.to(device)
 
     
-    optimizer = optim.SGD(model.parameters(), lr=0.0001)
+    optimizer = optim.SGD(model.parameters(), lr=0.001)
 
     lowerst_test_loss = float('inf')
 
