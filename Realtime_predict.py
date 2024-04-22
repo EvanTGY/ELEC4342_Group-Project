@@ -15,7 +15,8 @@ from torchvision.models import resnet50
 from torchvision.models.resnet import ResNet, Bottleneck, BasicBlock, ResNet50_Weights
 
 # 加载模型
-model = resnet50(weights=ResNet50_Weights.IMAGENET1K_V1)
+# model = resnet50(weights=ResNet50_Weights.IMAGENET1K_V1)
+model = resnet50(pretrained=True)
 model.fc = nn.Linear(model.fc.in_features, 3)
 model.load_state_dict(torch.load('Trained_Models/model_ResNet50_best.pth'))
 model.eval()

@@ -102,7 +102,7 @@ def test(model, device, test_loader):
 if __name__ == '__main__':
     
     transformations= transforms.Compose([
-                    transforms.Resize((227,227)),
+                    transforms.Resize((224,224)),
                     transforms.RandomRotation(180),
                     transforms.ToTensor(), 
                     transforms.Normalize((0.1307,), (0.3081,))
@@ -122,7 +122,7 @@ if __name__ == '__main__':
 
     model = model.to(device)
     
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    optimizer = optim.SGD(model.parameters(), lr=0.001)
 
     lowerst_test_loss = float('inf')
 
@@ -135,3 +135,4 @@ if __name__ == '__main__':
             print('Model saved')
             print('Model saved with test loss: {:.6f}'.format(test_loss))
             print('Model saved with accuracy: {:.2f}%'.format(accuracy))
+            print()
