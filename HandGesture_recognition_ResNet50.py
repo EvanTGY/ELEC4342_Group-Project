@@ -16,7 +16,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 class SaveImagesToCSV:
-    def __init__(self,root="./data", train = True, transforms=None):
+    def __init__(self,root="./data_marked", train = True, transforms=None):
         self.root = root
         self.pre = "/train_set/" if train else "/test_set/"
         self.count = 0
@@ -34,9 +34,9 @@ class SaveImagesToCSV:
         
         df = pandas.DataFrame({'image_path': self.data, 'label': self.labels})
         if train:
-            df.to_csv('./data/train_set/train_images.csv', index=False)
+            df.to_csv('./data_marked/train_set/train_images.csv', index=False)
         else:
-            df.to_csv('./data/test_set/test_images.csv', index=False)
+            df.to_csv('./data_marked/test_set/test_images.csv', index=False)
     
 class Dataset(Dataset):
     def __init__(self, csv_file, transforms = None):
@@ -110,8 +110,8 @@ if __name__ == '__main__':
     save_train_images = SaveImagesToCSV(root="./data", train=True)
     save_test_images = SaveImagesToCSV(root="./data", train=False)
 
-    train_dataset = Dataset(csv_file='./data/train_set/train_images.csv', transforms=transformations)
-    test_dataset = Dataset(csv_file="./data/test_set/test_images.csv", transforms=transformations)
+    train_dataset = Dataset(csv_file='./data_marked/train_set/train_images.csv', transforms=transformations)
+    test_dataset = Dataset(csv_file="./data_marked/test_set/test_images.csv", transforms=transformations)
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
@@ -143,7 +143,7 @@ if __name__ == '__main__':
         test_loss, accuracy = test(model, device, test_loader)
         if test_loss < lowerst_test_loss:
             lowerst_test_loss = test_loss
-            torch.save(model.state_dict(), 'Trained_models_test/model_ResNet50_best.pth')
+            torch.save(model.state_dict(), 'Trained_models_test/model_ResNet50_Marked.pth')
             print('Model saved')
             print('Model saved with test loss: {:.6f}'.format(test_loss))
             print('Model saved with accuracy: {:.2f}%'.format(accuracy))
