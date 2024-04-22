@@ -162,7 +162,7 @@ if __name__ == '__main__':
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
 
 
-    trained_model_path = 'Trained_Models/model_AlexNet.pth'
+    trained_model_path = 'Trained_models/model_AlexNet.pth'
 
     if os.path.exists(trained_model_path):
         print ('Loading model from {}'.format(trained_model_path))

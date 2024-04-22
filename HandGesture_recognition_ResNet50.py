@@ -9,7 +9,7 @@ from torchvision import datasets, transforms
 from torch.utils.data.sampler import SubsetRandomSampler
 from torch.utils.data.dataset import Dataset
 from torchvision.models import resnet50
-
+from torch.optim import lr_scheduler
 
 batch_size = 64
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -103,7 +103,7 @@ if __name__ == '__main__':
     
     transformations= transforms.Compose([
                     transforms.Resize((224,224)),
-                    transforms.RandomRotation(180),
+                    transforms.RandomRotation(30),
                     transforms.ToTensor(), 
                     transforms.Normalize((0.1307,), (0.3081,))
                     ])
@@ -116,23 +116,39 @@ if __name__ == '__main__':
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
 
+    print('Data loaded')
+
     model = resnet50(pretrained=True)
     num_ftrs = model.fc.in_features
     model.fc = nn.Linear(num_ftrs, 3)
+    # model = model.to(device)
 
-    model = model.to(device)
+    trained_model_path = 'Trained_models_test/model_ResNet50_best.pth'
+    if os.path.exists(trained_model_path):
+        print('Loading model from {}'.format(trained_model_path))
+        model.load_state_dict(torch.load(trained_model_path))
+        print('Model loaded')
+        model = model.to(device)
+    else:
+        print('Training model')
+        model = model.to(device)
+
     
-    optimizer = optim.SGD(model.parameters(), lr=0.001)
+    optimizer = optim.SGD(model.parameters(), lr=0.1)
+    scheduler = lr_scheduler.StepLR(optimizer, step_size=6, gamma=0.1)
 
     lowerst_test_loss = float('inf')
 
-    for epoch in range(1, 10):
+    for epoch in range(1, 21):
         train_loss = train(model, device, train_loader, optimizer, epoch)
         test_loss, accuracy = test(model, device, test_loader)
         if test_loss < lowerst_test_loss:
             lowerst_test_loss = test_loss
-            torch.save(model.state_dict(), 'Trained_Models_test/model_ResNet50_best.pth')
+            torch.save(model.state_dict(), 'Trained_models_test/model_ResNet50_best.pth')
             print('Model saved')
             print('Model saved with test loss: {:.6f}'.format(test_loss))
             print('Model saved with accuracy: {:.2f}%'.format(accuracy))
             print()
+            
+        # 更新学习率    
+        scheduler.step()
