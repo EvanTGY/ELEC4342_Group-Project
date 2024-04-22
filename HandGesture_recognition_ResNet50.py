@@ -15,8 +15,6 @@ batch_size = 128
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
-# 改变工作目录到脚本所在的目录
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # 你的其他代码在这里
 class SaveImagesToCSV:
