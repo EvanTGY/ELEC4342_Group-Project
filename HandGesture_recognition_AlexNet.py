@@ -18,7 +18,7 @@ class AlexNet(nn.Module):
         super(AlexNet, self).__init__()
 
         self.model = nn.Sequential( #3 32 32
-            nn.Conv2d(in_channels=3, out_channels=6, kernel_size=11, stride=4, padding=2),# 6 32 32
+            nn.Conv2d(in_channels=3, out_channels=6, kernel_size=5, stride=1, padding=2),# 6 32 32
             nn.MaxPool2d(kernel_size=2, stride=2, padding =0),#6 16 16
             nn.BatchNorm2d(num_features=6),
             nn.CELU(inplace=True),
@@ -44,7 +44,7 @@ class AlexNet(nn.Module):
 
         self.liner = nn.Sequential(
 
-            nn.Linear(64,4*4*4),
+            nn.Linear(3136,4*4*4),
             nn.CELU(inplace=True),
 
             nn.Linear(4*4*4,16),
