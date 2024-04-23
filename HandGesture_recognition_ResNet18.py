@@ -138,8 +138,8 @@ if __name__ == '__main__':
         model = model.to(device)
 
     
-    optimizer = optim.SGD(model.parameters(), lr=0.01)
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=6, gamma=0.5)
+    optimizer = optim.SGD(model.parameters(), lr=0.1)
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=4, gamma=0.6)
 
     lowerst_test_loss = float('inf')
 
