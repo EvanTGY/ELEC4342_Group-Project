@@ -2,14 +2,14 @@ import cv2
 import os
 import mediapipe as mp
 
-mp_hands = mp.solutions.hands.Hands(max_num_hands=1, min_detection_confidence=0.9, min_tracking_confidence=0.9)
+mp_hands = mp.solutions.hands.Hands(max_num_hands=1, min_detection_confidence=0.8, min_tracking_confidence=0.8)
 mp_draw = mp.solutions.drawing_utils
 
 # 改变工作目录到脚本所在的目录
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-input_folder_path = "./data/train_set/V"
-output_folder_path = "./data_marked/train_set/Scissor"
+input_folder_path = "./data/train_set/W"
+output_folder_path = "./data_marked/train_set/Paper"
 
 os.makedirs(output_folder_path, exist_ok=True)
 
