@@ -18,10 +18,10 @@ from torchvision.models.resnet import ResNet18_Weights, ResNet34_Weights, ResNet
 import mediapipe as mp
 # 加载模型
 # model = resnet50(weights=ResNet50_Weights.IMAGENET1K_V1)
-model = resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
+model = resnet34(weights=ResNet34_Weights.IMAGENET1K_V1)
 # model = resnet50(pretrained=True)
 model.fc = nn.Linear(model.fc.in_features, 3)
-Model_path = 'Trained_Models_test/ResNet18_Marked_94.pth'
+Model_path = 'Trained_Models_test/ResNet34_Marked.pth'
 model.load_state_dict(torch.load(Model_path))
 model.eval()
 
