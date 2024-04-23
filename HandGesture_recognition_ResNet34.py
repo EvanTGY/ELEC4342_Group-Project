@@ -141,12 +141,12 @@ if __name__ == '__main__':
         model = model.to(device)
 
     
-    optimizer = optim.SGD(model.parameters(), lr=0.004, weight_decay=0.001)
+    optimizer = optim.SGD(model.parameters(), lr=0.001, weight_decay=0.001)
     # scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=4, gamma=0.6)
 
     lowerst_test_loss = float('inf')
 
-    for epoch in range(1, 15 ):
+    for epoch in range(1, 16):
         # print("Learning rate:", scheduler.get_last_lr())
         train_loss = train(model, device, train_loader, optimizer, epoch)
         test_loss, accuracy = test(model, device, test_loader)
