@@ -17,14 +17,15 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 class SaveImagesToCSV:
-    def __init__(self,root="./data_marked", train = True, transforms=None):
+    def __init__(self,root="./data_black", train = True, transforms=None):
         self.root = root
         self.pre = "/train_set/" if train else "/test_set/"
         self.count = 0
         self.labels = []
         self.data = []
-        #self.nums = [4468, 4381, 4254] if train else [865, 899, 878]
-        self.nums = [3960, 3951, 3792] if train else [721, 874 ,812]
+        #self.nums = [4468, 4381, 4254] if train else [865, 899, 878] 
+        #self.nums = [3960, 3951, 3792] if train else [721, 874 ,812] # data_marked
+        self.nums = [524, 858, 735] if train else [214, 67 ,207] # data_black
         self.names = ["Rock/","Scissor/","Paper/"]
         #self.names =['O/','v','W/]
         self.transforms = transforms
