@@ -9,8 +9,8 @@ mp_draw = mp.solutions.drawing_utils
 # 改变工作目录到脚本所在的目录
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-input_folder_path = "./data/test_set/V"
-output_folder_path = "./data_marked/test_set/Scissor"
+input_folder_path = "./data_marked/test_set/Scissor"
+output_folder_path = "./data_black/test_set/Scissor"
 
 os.makedirs(output_folder_path, exist_ok=True)
 
@@ -32,7 +32,7 @@ for filename in os.listdir(input_folder_path):
         # plot the point and connection line
         if results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
-                mp_draw.draw_landmarks(img, hand_landmarks, mp.solutions.hands.HAND_CONNECTIONS,
+                mp_draw.draw_landmarks(blank_img, hand_landmarks, mp.solutions.hands.HAND_CONNECTIONS,
                                        mp_draw.DrawingSpec(color=(0, 255, 0), thickness=2, circle_radius=2),
                                        mp_draw.DrawingSpec(color=(0, 0, 255), thickness=3, circle_radius=2))
 
@@ -43,5 +43,5 @@ for filename in os.listdir(input_folder_path):
 
             print(f'Saved output image: {output_img_path}')
 
-
+            image_count += 1
 mp_hands.close()
