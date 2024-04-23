@@ -8,7 +8,8 @@ from PIL import Image
 from torchvision import datasets, transforms
 from torch.utils.data.sampler import SubsetRandomSampler
 from torch.utils.data.dataset import Dataset
-from torchvision.models import resnet50
+from torchvision.models.resnet import resnet50, ResNet50_Weights
+
 
 
 batch_size = 128
@@ -120,12 +121,12 @@ if __name__ == '__main__':
 
     print('Data loaded')
 
-    model = resnet50(pretrained=True)
+    model = resnet50(weights=ResNet50_Weights.IMAGENET1K_V1)
     num_ftrs = model.fc.in_features
     model.fc = nn.Linear(num_ftrs, 3)
     # model = model.to(device)
 
-    trained_model_path = 'Trained_Models_test/model_ResNet50_best.pth'
+    trained_model_path = 'Trained_Models_test/ResNet50_marked2.pth'
     if os.path.exists(trained_model_path):
         print('Loading model from {}'.format(trained_model_path))
         model.load_state_dict(torch.load(trained_model_path))
@@ -137,16 +138,20 @@ if __name__ == '__main__':
 
     
     optimizer = optim.SGD(model.parameters(), lr=0.001)
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.9)
 
     lowerst_test_loss = float('inf')
 
     for epoch in range(1, 11):
         train_loss = train(model, device, train_loader, optimizer, epoch)
         test_loss, accuracy = test(model, device, test_loader)
+        scheduler.step()
         if test_loss < lowerst_test_loss:
             lowerst_test_loss = test_loss
-            torch.save(model.state_dict(), 'Trained_Models_test/model_ResNet50_Marked.pth')
+            torch.save(model.state_dict(), 'Trained_Models_test/ResNet50_Marked2.pth')
             print('Model saved')
             print('Model saved with test loss: {:.6f}'.format(test_loss))
             print('Model saved with accuracy: {:.2f}%'.format(accuracy))
             print()
+
+        torch.cuda.empty_cache()
