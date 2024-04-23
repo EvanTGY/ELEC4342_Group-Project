@@ -104,12 +104,14 @@ def test(model, device, test_loader):
 
 
 if __name__ == '__main__':
-    
+
     transformations= transforms.Compose([
                     transforms.Resize((224,224)),
+                    transforms.RandomHorizontalFlip(),
                     transforms.RandomRotation(15),
                     transforms.ToTensor(), 
-                    transforms.Normalize((0.1307,), (0.3081,))
+                    # transforms.Normalize((0.1307,), (0.3081,))
+                    transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
                     ])
     save_train_images = SaveImagesToCSV(root="./data_marked", train=True)
     save_test_images = SaveImagesToCSV(root="./data_marked", train=False)
@@ -138,16 +140,16 @@ if __name__ == '__main__':
         model = model.to(device)
 
     
-    optimizer = optim.SGD(model.parameters(), lr=0.1)
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=4, gamma=0.6)
+    optimizer = optim.SGD(model.parameters(), lr=0.015)
+    # scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=4, gamma=0.6)
 
     lowerst_test_loss = float('inf')
 
     for epoch in range(1, 31):
-        print("Learning rate:", scheduler.get_last_lr())
+        # print("Learning rate:", scheduler.get_last_lr())
         train_loss = train(model, device, train_loader, optimizer, epoch)
         test_loss, accuracy = test(model, device, test_loader)
-        scheduler.step()
+        # scheduler.step()
         if test_loss < lowerst_test_loss:
             lowerst_test_loss = test_loss
             torch.save(model.state_dict(), 'Trained_Models_test/ResNet18_Marked.pth')
