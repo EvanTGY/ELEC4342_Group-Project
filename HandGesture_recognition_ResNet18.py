@@ -108,6 +108,8 @@ if __name__ == '__main__':
     transformations= transforms.Compose([
                     transforms.Resize((224,224)),
                     transforms.RandomHorizontalFlip(),
+                    transforms.RandomVerticalFlip(),
+                    transforms.RandomHorizontalFlip(),
                     transforms.RandomRotation(15),
                     transforms.ToTensor(), 
                     # transforms.Normalize((0.1307,), (0.3081,))

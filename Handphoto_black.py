@@ -3,7 +3,7 @@ import os
 import mediapipe as mp
 import numpy as np
 
-mp_hands = mp.solutions.hands.Hands(max_num_hands=1, min_detection_confidence=0.8, min_tracking_confidence=0.8)
+mp_hands = mp.solutions.hands.Hands(max_num_hands=1, min_detection_confidence=0.8, min_tracking_confidence=0.3)
 mp_draw = mp.solutions.drawing_utils
 
 # 改变工作目录到脚本所在的目录
