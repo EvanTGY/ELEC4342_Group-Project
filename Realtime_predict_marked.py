@@ -16,6 +16,8 @@ from torchvision.models import resnet50, resnet18, resnet34
 from torchvision.models.resnet import ResNet, Bottleneck, BasicBlock, ResNet50_Weights, ResNet18_Weights
 from torchvision.models.resnet import ResNet18_Weights, ResNet34_Weights, ResNet50_Weights
 import mediapipe as mp
+
+
 # 加载模型
 # model = resnet50(weights=ResNet50_Weights.IMAGENET1K_V1)
 model = resnet34(weights=ResNet34_Weights.IMAGENET1K_V1)
