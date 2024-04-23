@@ -128,6 +128,7 @@ if __name__ == '__main__':
     # model = model.to(device)
 
     trained_model_path = 'Trained_Models_test/ResNet18_Marked.pth'
+    
     if os.path.exists(trained_model_path):
         print('Loading model from {}'.format(trained_model_path))
         model.load_state_dict(torch.load(trained_model_path))
