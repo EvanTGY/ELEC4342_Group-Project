@@ -7,6 +7,8 @@ from torchvision import datasets, transforms
 from torch.utils.data.sampler import SubsetRandomSampler
 from torch.utils.data.dataset import Dataset
 from torchvision import models
+import pandas
+import os
 
 
 batch_size = 128
@@ -21,7 +23,7 @@ class LeNet5_unquantized(nn.Module):
         self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
         self.conv2 = nn.Conv2d(6, 16, kernel_size=5)
         self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
-        self.fc1 = nn.Linear(218544, 120)
+        self.fc1 = nn.Linear(44944, 120)
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 10)
 
@@ -35,37 +37,49 @@ class LeNet5_unquantized(nn.Module):
         return x
 
 
-class Dataset(Dataset):
-    def __init__(self, root="./data", train=True, transforms=None):
+class SaveImagesToCSV:
+    def __init__(self,root="./data_marked", train = True, transforms=None):
         self.root = root
         self.pre = "/train_set/" if train else "/test_set/"
         self.count = 0
         self.labels = []
         self.data = []
-        self.nums = [4468, 4381, 4254] if train else [865, 899, 878]
-        self.names = ["O/","V/","W/"]
+        #self.nums = [4468, 4381, 4254] if train else [865, 899, 878]
+        self.nums = [3960, 3951, 3792] if train else [721, 874 ,812]
+        self.names = ["Rock/","Scissor/","Paper/"]
+        #self.names =['O/','v','W/]
         self.transforms = transforms
         for i in range(3):
             name = self.names[i]
             for j in range(self.nums[i]):
-                self.data.append(self.read_image(self.root+self.pre+name+str(j)+".jpg"))
+                self.data.append(self.root+self.pre+name+str(j)+".jpg")
                 self.labels.append(i)
                 self.count += 1
-
-    def read_image(self, file_name):
-        with Image.open(file_name) as image:
-        # image = torchvision.transforms.functional.pil_to_tensor(image)
-            return image.copy()
-
-    def __getitem__(self, index):
-        image = self.data[index]
-        if self.transforms is not None:
-            image = self.transforms(image)
-        label = self.labels[index]
-        return (image, label)
+        
+        df = pandas.DataFrame({'image_path': self.data, 'label': self.labels})
+        if train:
+            df.to_csv('./data_marked/train_set/train_images_marked.csv', index=False)
+        else:
+            df.to_csv('./data_marked/test_set/test_images_marked.csv', index=False)
+    
+class Dataset(Dataset):
+    def __init__(self, csv_file, transforms = None):
+        if not os.path.exists(csv_file):
+            print('CSV file not found')
+            return
+        self.dataframe = pandas.read_csv(csv_file)
+        self.transform = transforms
 
     def __len__(self):
-        return self.count
+        return len(self.dataframe)
+    
+    def __getitem__(self, idx):
+        image_path = self.dataframe.iloc[idx, 0]
+        image = Image.open(image_path)
+        if self.transform:
+            image = self.transform(image)
+        label = self.dataframe.iloc[idx, 1]
+        return image, label
 
 criterion = nn.CrossEntropyLoss()
 
@@ -103,59 +117,58 @@ def test(model, device, test_loader):
     accuracy = 100. * correct / len(test_loader.dataset)
     print('Average test Loss: {:.6f}'.format(test_loss))
     print('Accuracy: {}/{} ({:.2f}%)'.format(correct, len(test_loader.dataset), accuracy))
+    print()
     return test_loss, accuracy
 
-
-# if __name__ == '__main__':
-    
-#     transformations= transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
-
-#     train_dataset = Dataset(root="./data", train=True, transforms=transformations)
-#     test_dataset = Dataset(root="./data", train=False, transforms=transformations)
-
-#     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
-#     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
-    
-#     print('Data loaded')
-
-#     # model = LeNet5_unquantized().to(device)
-
-#     model = models.vgg16(pretrained=True)
-
-
-#     num_ftrs = model.classifier[6].in_features
-#     model.classifier[6] = nn.Linear(num_ftrs, 3)
-
-#     model = model.to(device)
-    
-#     optimizer = optim.Adam(model.parameters(), lr=0.001)
-
-#     for epoch in range(1, 10):
-#         train_loss = train(model, device, train_loader, optimizer, epoch)
-#         test_loss, accuracy = test(model, device, test_loader)
-
-#     torch.save(model.state_dict(), 'model.pth')
-#     print('Model saved')
 
 
 if __name__ == '__main__':
     
-    transformations= transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
+    transformations= transforms.Compose([
+                    transforms.Resize((224,224)),
+                    transforms.RandomRotation(15),
+                    transforms.ToTensor(), 
+                    transforms.Normalize((0.1307,), (0.3081,))
+                    ])
+    save_train_images = SaveImagesToCSV(root="./data_marked", train=True)
+    save_test_images = SaveImagesToCSV(root="./data_marked", train=False)
 
-    train_dataset = Dataset(root="./data", train=True, transforms=transformations)
-    test_dataset = Dataset(root="./data", train=False, transforms=transformations)
+    train_dataset = Dataset(csv_file='./data_marked/train_set/train_images_marked.csv', transforms=transformations)
+    test_dataset = Dataset(csv_file="./data_marked/test_set/test_images_marked.csv", transforms=transformations)
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
-    
+
     print('Data loaded')
 
-    model = LeNet5_unquantized().to(device)
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    model = LeNet5_unquantized()
+    # model = model.to(device)    
 
-    for epoch in range(1, 10):
+    trained_model_path = 'Trained_Models_test/LetNet5_marked.pth'
+    if os.path.exists(trained_model_path):
+        print('Loading model from {}'.format(trained_model_path))
+        model.load_state_dict(torch.load(trained_model_path))
+        print('Model loaded')
+        model = model.to(device)
+    else:
+        print('Training model')
+        model = model.to(device)
+    
+    optimizer = optim.SGD(model.parameters(), lr=0.001)
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.9)
+
+    lowerst_test_loss = float('inf')
+
+    for epoch in range(1, 11):
         train_loss = train(model, device, train_loader, optimizer, epoch)
         test_loss, accuracy = test(model, device, test_loader)
+        scheduler.step()
+        if test_loss < lowerst_test_loss:
+            lowerst_test_loss = test_loss
+            torch.save(model.state_dict(), 'Trained_Models_test/LeNet5_Marked.pth')
+            print('Model saved')
+            print('Model saved with test loss: {:.6f}'.format(test_loss))
+            print('Model saved with accuracy: {:.2f}%'.format(accuracy))
+            print()
 
-    torch.save(model.state_dict(), 'Trained_Models/model_LeNet5.pth')
-    print('Model saved')
+        torch.cuda.empty_cache()
