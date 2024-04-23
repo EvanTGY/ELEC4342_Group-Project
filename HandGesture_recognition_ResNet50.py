@@ -106,9 +106,11 @@ if __name__ == '__main__':
     
     transformations= transforms.Compose([
                     transforms.Resize((224,224)),
+                    transforms.RandomHorizontalFlip(),
                     transforms.RandomRotation(15),
                     transforms.ToTensor(), 
-                    transforms.Normalize((0.1307,), (0.3081,))
+                    # transforms.Normalize((0.1307,), (0.3081,))
+                    transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
                     ])
     save_train_images = SaveImagesToCSV(root="./data_marked", train=True)
     save_test_images = SaveImagesToCSV(root="./data_marked", train=False)
@@ -138,14 +140,14 @@ if __name__ == '__main__':
 
     
     optimizer = optim.SGD(model.parameters(), lr=0.001)
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.9)
+    # scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.9)
 
     lowerst_test_loss = float('inf')
 
     for epoch in range(1, 11):
         train_loss = train(model, device, train_loader, optimizer, epoch)
         test_loss, accuracy = test(model, device, test_loader)
-        scheduler.step()
+        # scheduler.step()
         if test_loss < lowerst_test_loss:
             lowerst_test_loss = test_loss
             torch.save(model.state_dict(), 'Trained_Models_test/ResNet50_Marked2.pth')
