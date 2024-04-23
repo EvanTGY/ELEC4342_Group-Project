@@ -8,8 +8,8 @@ mp_draw = mp.solutions.drawing_utils
 # 改变工作目录到脚本所在的目录
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-input_folder_path = "./data/train_set/W"
-output_folder_path = "./data_marked/train_set/Paper"
+input_folder_path = "./data/test_set/O"
+output_folder_path = "./data_marked/test_set/Rock"
 
 os.makedirs(output_folder_path, exist_ok=True)
 
@@ -41,7 +41,7 @@ for filename in os.listdir(input_folder_path):
             print(f'Saved output image: {output_img_path}')
 
             image_count += 1
-            if image_count > 3330:
+            if image_count > 800:
                 break
 
 mp_hands.close()
