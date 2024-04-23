@@ -3,11 +3,11 @@ import os
 import mediapipe as mp
 import numpy as np
 
-mp_hands = mp.solutions.hands.Hands(max_num_hands=1, min_detection_confidence=0.9, min_tracking_confidence=0.9)
+mp_hands = mp.solutions.hands.Hands(max_num_hands=1, min_detection_confidence=0.4, min_tracking_confidence=0.4)
 mp_draw = mp.solutions.drawing_utils
 
-input_folder_path = "./data_marked/test_set/Rock"
-output_folder_path = "./data_black/test_set/Rock"
+input_folder_path = "./data_marked/test_set/Scissor"
+output_folder_path = "./data_black/test_set/Scissor"
 
 os.makedirs(output_folder_path, exist_ok=True)
 
