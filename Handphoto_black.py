@@ -3,11 +3,14 @@ import os
 import mediapipe as mp
 import numpy as np
 
-mp_hands = mp.solutions.hands.Hands(max_num_hands=1, min_detection_confidence=0.2, min_tracking_confidence=0.4)
+mp_hands = mp.solutions.hands.Hands(max_num_hands=1, min_detection_confidence=0.8, min_tracking_confidence=0.8)
 mp_draw = mp.solutions.drawing_utils
 
-input_folder_path = "./data_marked/test_set/Scissor"
-output_folder_path = "./data_black/test_set/Scissor"
+# 改变工作目录到脚本所在的目录
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+input_folder_path = "./data/test_set/V"
+output_folder_path = "./data_marked/test_set/Scissor"
 
 os.makedirs(output_folder_path, exist_ok=True)
 
@@ -19,17 +22,17 @@ for filename in os.listdir(input_folder_path):
         img = cv2.imread(img_path)
 
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
+        
         # keypoint detection
         results = mp_hands.process(img_rgb)
 
-        # create a blank image to draw keypoints and connections
+        # create a blanck image with the same size as the original image
         blank_img = np.zeros_like(img)
 
-        # plot the point and connection line on the blank image
+        # plot the point and connection line
         if results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
-                mp_draw.draw_landmarks(blank_img, hand_landmarks, mp.solutions.hands.HAND_CONNECTIONS,
+                mp_draw.draw_landmarks(img, hand_landmarks, mp.solutions.hands.HAND_CONNECTIONS,
                                        mp_draw.DrawingSpec(color=(0, 255, 0), thickness=2, circle_radius=2),
                                        mp_draw.DrawingSpec(color=(0, 0, 255), thickness=3, circle_radius=2))
 
@@ -40,6 +43,5 @@ for filename in os.listdir(input_folder_path):
 
             print(f'Saved output image: {output_img_path}')
 
-            image_count += 1
 
 mp_hands.close()
