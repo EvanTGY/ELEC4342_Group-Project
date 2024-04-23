@@ -144,11 +144,11 @@ if __name__ == '__main__':
 
     
     optimizer = optim.SGD(model.parameters(), lr=0.015)
-    # scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=4, gamma=0.6)
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.6)
 
     lowerst_test_loss = float('inf')
 
-    for epoch in range(1, 31):
+    for epoch in range(1, 21):
         # print("Learning rate:", scheduler.get_last_lr())
         train_loss = train(model, device, train_loader, optimizer, epoch)
         test_loss, accuracy = test(model, device, test_loader)
