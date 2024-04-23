@@ -17,15 +17,15 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 class SaveImagesToCSV:
-    def __init__(self,root="./data_black", train = True, transforms=None):
+    def __init__(self,root="./data_marked", train = True, transforms=None):
         self.root = root
         self.pre = "/train_set/" if train else "/test_set/"
         self.count = 0
         self.labels = []
         self.data = []
         #self.nums = [4468, 4381, 4254] if train else [865, 899, 878] 
-        #self.nums = [3960, 3951, 3792] if train else [721, 874 ,812] # data_marked
-        self.nums = [524, 858, 735] if train else [214, 76 ,207] # data_black
+        self.nums = [3960, 3951, 3792] if train else [721, 874 ,812] # data_marked
+        # self.nums = [524, 858, 735] if train else [214, 76 ,207] # data_black
         self.names = ["Rock/","Scissor/","Paper/"]
         #self.names =['O/','v','W/]
         self.transforms = transforms
@@ -38,9 +38,9 @@ class SaveImagesToCSV:
         
         df = pandas.DataFrame({'image_path': self.data, 'label': self.labels})
         if train:
-            df.to_csv('./data_black/train_set/train_images_marked.csv', index=False)
+            df.to_csv('./data_marked/train_set/train_images_marked.csv', index=False)
         else:
-            df.to_csv('./data_black/test_set/test_images_marked.csv', index=False)
+            df.to_csv('./data_marked/test_set/test_images_marked.csv', index=False)
     
 class Dataset(Dataset):
     def __init__(self, csv_file, transforms = None):
@@ -108,15 +108,17 @@ if __name__ == '__main__':
     
     transformations= transforms.Compose([
                     transforms.Resize((224,224)),
+                    transforms.RandomHorizontalFlip(),
                     transforms.RandomRotation(15),
                     transforms.ToTensor(), 
-                    transforms.Normalize((0.1307,), (0.3081,))
+                    # transforms.Normalize((0.1307,), (0.3081,))
+                    transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
                     ])
-    save_train_images = SaveImagesToCSV(root="./data_black", train=True)
-    save_test_images = SaveImagesToCSV(root="./data_black", train=False)
+    save_train_images = SaveImagesToCSV(root="./data_marked", train=True)
+    save_test_images = SaveImagesToCSV(root="./data_marked", train=False)
 
-    train_dataset = Dataset(csv_file='./data_black/train_set/train_images_marked.csv', transforms=transformations)
-    test_dataset = Dataset(csv_file="./data_black/test_set/test_images_marked.csv", transforms=transformations)
+    train_dataset = Dataset(csv_file='./data_marked/train_set/train_images_marked.csv', transforms=transformations)
+    test_dataset = Dataset(csv_file="./data_marked/test_set/test_images_marked.csv", transforms=transformations)
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
@@ -139,16 +141,16 @@ if __name__ == '__main__':
         model = model.to(device)
 
     
-    optimizer = optim.SGD(model.parameters(), lr=0.1)
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=4, gamma=0.6)
+    optimizer = optim.SGD(model.parameters(), lr=0.004, weight_decay=0.001)
+    # scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=4, gamma=0.6)
 
     lowerst_test_loss = float('inf')
 
-    for epoch in range(1, 31):
-        print("Learning rate:", scheduler.get_last_lr())
+    for epoch in range(1, 15 ):
+        # print("Learning rate:", scheduler.get_last_lr())
         train_loss = train(model, device, train_loader, optimizer, epoch)
         test_loss, accuracy = test(model, device, test_loader)
-        scheduler.step()
+        # scheduler.step()
         if test_loss < lowerst_test_loss:
             lowerst_test_loss = test_loss
             torch.save(model.state_dict(), 'Trained_Models_test/ResNet34_Marked.pth')
