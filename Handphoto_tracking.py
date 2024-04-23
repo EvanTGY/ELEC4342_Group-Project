@@ -2,14 +2,14 @@ import cv2
 import os
 import mediapipe as mp
 
-mp_hands = mp.solutions.hands.Hands(max_num_hands=1, min_detection_confidence=0.6, min_tracking_confidence=0.6)
+mp_hands = mp.solutions.hands.Hands(max_num_hands=1, min_detection_confidence=0.9, min_tracking_confidence=0.9)
 mp_draw = mp.solutions.drawing_utils
 
 # 改变工作目录到脚本所在的目录
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-input_folder_path = "./data/test_set/V"
-output_folder_path = "./data_marked/test_set/Scissor"
+input_folder_path = "./data/train_set/V"
+output_folder_path = "./data_marked/train_set/Scissor"
 
 os.makedirs(output_folder_path, exist_ok=True)
 
@@ -41,6 +41,7 @@ for filename in os.listdir(input_folder_path):
             print(f'Saved output image: {output_img_path}')
 
             image_count += 1
-
+            if image_count > 3330:
+                break
 
 mp_hands.close()
