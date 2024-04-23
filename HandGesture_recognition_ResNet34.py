@@ -25,7 +25,7 @@ class SaveImagesToCSV:
         self.data = []
         #self.nums = [4468, 4381, 4254] if train else [865, 899, 878] 
         #self.nums = [3960, 3951, 3792] if train else [721, 874 ,812] # data_marked
-        self.nums = [524, 858, 735] if train else [214, 67 ,207] # data_black
+        self.nums = [524, 858, 735] if train else [214, 76 ,207] # data_black
         self.names = ["Rock/","Scissor/","Paper/"]
         #self.names =['O/','v','W/]
         self.transforms = transforms
@@ -38,9 +38,9 @@ class SaveImagesToCSV:
         
         df = pandas.DataFrame({'image_path': self.data, 'label': self.labels})
         if train:
-            df.to_csv('./data_marked/train_set/train_images_marked.csv', index=False)
+            df.to_csv('./data_black/train_set/train_images_marked.csv', index=False)
         else:
-            df.to_csv('./data_marked/test_set/test_images_marked.csv', index=False)
+            df.to_csv('./data_black/test_set/test_images_marked.csv', index=False)
     
 class Dataset(Dataset):
     def __init__(self, csv_file, transforms = None):
@@ -112,11 +112,11 @@ if __name__ == '__main__':
                     transforms.ToTensor(), 
                     transforms.Normalize((0.1307,), (0.3081,))
                     ])
-    save_train_images = SaveImagesToCSV(root="./data_marked", train=True)
-    save_test_images = SaveImagesToCSV(root="./data_marked", train=False)
+    save_train_images = SaveImagesToCSV(root="./data_black", train=True)
+    save_test_images = SaveImagesToCSV(root="./data_black", train=False)
 
-    train_dataset = Dataset(csv_file='./data_marked/train_set/train_images_marked.csv', transforms=transformations)
-    test_dataset = Dataset(csv_file="./data_marked/test_set/test_images_marked.csv", transforms=transformations)
+    train_dataset = Dataset(csv_file='./data_black/train_set/train_images_marked.csv', transforms=transformations)
+    test_dataset = Dataset(csv_file="./data_black/test_set/test_images_marked.csv", transforms=transformations)
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
