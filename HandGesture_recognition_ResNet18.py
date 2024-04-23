@@ -24,7 +24,7 @@ class SaveImagesToCSV:
         self.labels = []
         self.data = []
         #self.nums = [4468, 4381, 4254] if train else [865, 899, 878]
-        self.nums = [3960, 3951, 3792] if train else [721, 874 ,812]
+        self.nums = [3331, 3318, 3331] if train else [704, 801 ,795] # data_marked
         self.names = ["Rock/","Scissor/","Paper/"]
         #self.names =['O/','v','W/]
         self.transforms = transforms
