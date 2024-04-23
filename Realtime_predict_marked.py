@@ -13,12 +13,12 @@ from torchvision import datasets, transforms
 from torch.utils.data.sampler import SubsetRandomSampler
 from torch.utils.data.dataset import Dataset
 from torchvision.models import resnet50, resnet18, resnet34
-from torchvision.models.resnet import ResNet, Bottleneck, BasicBlock, ResNet50_Weights
+from torchvision.models.resnet import ResNet, Bottleneck, BasicBlock, ResNet50_Weights, ResNet18_Weights, ResNet_34
 from torchvision.models.resnet import ResNet18_Weights
 import mediapipe as mp
 # 加载模型
 # model = resnet50(weights=ResNet50_Weights.IMAGENET1K_V1)
-model = resnet18(weights=ResNet_34.Weights.IMAGENET1K_V1)
+model = resnet34(weights=ResNet_34.Weights.IMAGENET1K_V1)
 # model = resnet50(pretrained=True)
 model.fc = nn.Linear(model.fc.in_features, 3)
 Model_path = 'Trained_Models_final/ResNet18_Marked_94.pth'
