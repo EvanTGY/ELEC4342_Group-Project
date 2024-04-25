@@ -22,7 +22,7 @@ import mediapipe as mp
 model = resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
 # model = resnet50(pretrained=True)
 model.fc = nn.Linear(model.fc.in_features, 3)
-Model_path = 'E:\TEST\ResNet18_Marked_96.pth'
+Model_path = 'ResNet18_Marked_96.pth'
 # Model_path = 'Trained_Models_final/ResNet50_Marked.pth'
 model.load_state_dict(torch.load(Model_path, map_location=torch.device('cpu')))
 model.eval()
