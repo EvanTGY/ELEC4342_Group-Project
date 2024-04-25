@@ -12,14 +12,14 @@ from PIL import Image
 from torchvision import datasets, transforms
 from torch.utils.data.sampler import SubsetRandomSampler
 from torch.utils.data.dataset import Dataset
-from torchvision.models import resnet50
-from torchvision.models.resnet import ResNet, Bottleneck, BasicBlock, ResNet50_Weights
+from torchvision.models import resnet50,resnet18
+from torchvision.models.resnet import ResNet, Bottleneck, BasicBlock, ResNet50_Weights,ResNet18_Weights
 
 # 加载模型
-# model = resnet50(weights=ResNet50_Weights.IMAGENET1K_V1)
-model = resnet50(pretrained=True)
+model = resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
+# model = resnet18(pretrained=True)
 model.fc = nn.Linear(model.fc.in_features, 3)
-Model_path = 'Trained_Models_final/model_ResNet50_best.pth'
+Model_path = 'Trained_Models_final/ResNet18_Marked_94.pth'
 model.load_state_dict(torch.load(Model_path))
 model.eval()
 
@@ -41,11 +41,15 @@ bottom_right = (400,400)
 
 pre_frame_time = 0
 while True:
-    current_time = time.time()
+
     # 读取一帧
     ret, frame = cap.read()
     if not ret:
         break
+    current_time = time.time()
+    fps = 1/(current_time - pre_frame_time)
+    pre_frame_time = current_time
+    cv2.putText(frame, 'FPS: {}'.format(int(fps)), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
     
     cv2.rectangle(frame, top_left, bottom_right, (0, 255, 0), 2)
 
@@ -61,7 +65,7 @@ while True:
         _, predicted = torch.max(output, 1)
 
     # 显示预测结果
-    cv2.putText(frame, 'Predicted: {}'.format(classes[predicted.item()]), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.putText(frame, 'Predicted: {}'.format(classes[predicted.item()]), (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
     cv2.imshow('frame', frame)
 
     # 如果按下 'q' 键，就退出循环
