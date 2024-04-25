@@ -109,7 +109,6 @@ if __name__ == '__main__':
                     transforms.Resize((224,224)),
                     transforms.RandomHorizontalFlip(),
                     transforms.RandomVerticalFlip(),
-                    transforms.RandomHorizontalFlip(),
                     transforms.RandomRotation(15),
                     transforms.ToTensor(), 
                     # transforms.Normalize((0.1307,), (0.3081,))
@@ -142,13 +141,12 @@ if __name__ == '__main__':
         print('Training model...')
         model = model.to(device)
 
-    
-    optimizer = optim.SGD(model.parameters(), lr=0.015)
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.6)
+    optimizer = optim.SGD(model.parameters(), lr=0.0015, weight_decay=0.001)
+    # scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=4, gamma=0.6)
 
     lowerst_test_loss = float('inf')
 
-    for epoch in range(1, 21):
+    for epoch in range(1, 16):
         # print("Learning rate:", scheduler.get_last_lr())
         train_loss = train(model, device, train_loader, optimizer, epoch)
         test_loss, accuracy = test(model, device, test_loader)
@@ -159,6 +157,5 @@ if __name__ == '__main__':
             print('Model saved')
             print('Model saved with test loss: {:.6f}'.format(test_loss))
             print('Model saved with accuracy: {:.2f}%'.format(accuracy))
-            print()
-
+            print()  
         torch.cuda.empty_cache()
