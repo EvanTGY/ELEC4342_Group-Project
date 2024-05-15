@@ -125,12 +125,19 @@ if __name__ == '__main__':
 
     print('Data loaded')
 
-    model = resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
-    num_ftrs = model.fc.in_features
-    model.fc = nn.Linear(num_ftrs, 3)
-    # model = model.to(device)
+    # model = resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
+    # num_ftrs = model.fc.in_features
+    # model.fc = nn.Linear(num_ftrs, 3)
+    # # model = model.to(device)
 
-    trained_model_path = 'Trained_Models_test/ResNet18_Marked.pth'
+    model = torchvision.models.quantization.resnet18(weights="DEFAULT", quantize=False)
+    model.fc = torch.nn.Linear(512, 3)
+    model.load_state_dict(torch.load("Trained_Models_test/resnet18_dataset5_retrain.pth"))
+    model.qconfig = torch.quantization.get_default_qat_qconfig("qnnpack")
+    model.fuse_model(is_qat=True)
+    model_qat = torch.quantization.prepare_qat(model, inplace=False)
+
+    trained_model_path = 'Trained_Models_test/ResNet18_QAT.pth'
     
     if os.path.exists(trained_model_path):
         print('Loading model from {}'.format(trained_model_path))
@@ -153,7 +160,7 @@ if __name__ == '__main__':
         # scheduler.step()
         if test_loss < lowerst_test_loss:
             lowerst_test_loss = test_loss
-            torch.save(model.state_dict(), 'Trained_Models_test/ResNet18_Marked.pth')
+            torch.save(model.state_dict(), 'Trained_Models_test/ResNet18_QAT.pth')
             print('Model saved')
             print('Model saved with test loss: {:.6f}'.format(test_loss))
             print('Model saved with accuracy: {:.2f}%'.format(accuracy))
