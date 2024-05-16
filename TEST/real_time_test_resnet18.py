@@ -44,7 +44,7 @@ def main():
     num_ftrs = model.fc.in_features
     model.fc = nn.Linear(num_ftrs, 3)
 
-    state_dict = torch.load(r"Trained_Models_test\resnet18_dataset5_retrain.pth", map_location=torch.device('cpu'))
+    state_dict = torch.load(r"Trained_Models_final\resnet18_dataset5_retrain.pth", map_location=torch.device('cpu'))
     model.load_state_dict(state_dict)
     model.eval()
 
